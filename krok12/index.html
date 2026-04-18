@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Krok 12 — Refleksja</title>
+
+<style>
+body{
+  font-family:-apple-system;
+  background:#fafafa;
+  margin:0;
+  padding:20px;
+}
+h1{text-align:center}
+textarea{
+  width:100%;
+  min-height:100px;
+  margin:10px 0;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+button{
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:16px;
+}
+pre{
+  background:white;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  white-space:pre-wrap;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Krok 12</h1>
+
+<textarea id="sytuacja" placeholder="Sytuacja"></textarea>
+<textarea id="uczucia" placeholder="Uczucia"></textarea>
+<textarea id="mysli" placeholder="Myśli"></textarea>
+<textarea id="dzialania" placeholder="Działania"></textarea>
+<textarea id="wnioski" placeholder="Wnioski"></textarea>
+
+<button onclick="generuj()">Generuj raport</button>
+
+<pre id="raport"></pre>
+
+<script>
+function generuj(){
+  let tekst =
+  "KROK 12\\n\\n" +
+  "Sytuacja:\\n" + document.getElementById("sytuacja").value + "\\n\\n" +
+  "Uczucia:\\n" + document.getElementById("uczucia").value + "\\n\\n" +
+  "Myśli:\\n" + document.getElementById("mysli").value + "\\n\\n" +
+  "Działania:\\n" + document.getElementById("dzialania").value + "\\n\\n" +
+  "Wnioski:\\n" + document.getElementById("wnioski").value;
+
+  document.getElementById("raport").textContent = tekst;
+}
+</script>
+
+</body>
+</html>
