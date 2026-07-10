@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PlanDnia.xce — Wersja mobilna</title>
+<style>
+  :root{
+    --bg:#fafafa; --card:#ffffff; --ink:#111827; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb;
+    --timew:56px; --hour:48px;
+    --work:#3b82f6; --rest:#22c55e; --sport:#f97316; --spirit:#f59e0b; --home:#8b5cf6; --other:#ef4444;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{position:sticky;top:0;background:var(--card);z-index:10;border-bottom:1px solid var(--line)}
+  .wrap{max-width:1100px;margin:0 auto;padding:10px 14px}
+  h1{font-size:20px;margin:2px 0}
+  .sub{margin:2px 0 8px;color:var(--muted);font-size:12px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{appearance:none;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+  .btn.primary{border-color:var(--accent);background:var(--accent);color:#fff}
+  .btn.danger{border-color:#ef4444;color:#ef4444;background:#fff}
+  main{padding:12px 14px}
+  /* Legend */
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 12px}
+  .tag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--muted);background:#fff}
+  .dot{width:12px;height:12px;border-radius:3px}
+  .w{background:var(--work)} .r{background:var(--rest)} .s{background:var(--sport)} .t{background:var(--spirit)} .h{background:var(--home)} .o{background:var(--other)}
+  /* Grid */
+  .grid{position:relative;display:grid;grid-template-columns:var(--timew) repeat(7, 1fr);border:1px solid var(--line);background:var(--card);border-radius:12px;overflow:hidden}
+  .timecell{height:var(--hour);border-top:1px solid var(--line);padding:4px 6px;color:var(--muted);font-size:12px}
+  .timecell:first-child{border-top:none}
+  .dayhead{position:sticky;top:41px;background:#fff;border-bottom:1px solid var(--line);z-index:5;padding:8px 10px;font-weight:600;text-align:center}
+  .col{position:relative;border-left:1px solid var(--line)}
+  .col .hourline{position:absolute;left:0;right:0;height:1px;background:var(--line)}
+  /* Block cards */
+  .block{position:absolute;left:6px;right:6px;border-radius:10px;color:#fff;padding:6px 8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.1);cursor:pointer}
+  .block .tit{font-weight:600;font-size:13px}
+  .block .meta{font-size:12px;opacity:.9}
+  .cat-work{background:var(--work)} .cat-rest{background:var(--rest)} .cat-sport{background:var(--sport)} .cat-spirit{background:var(--spirit)} .cat-home{background:var(--home)} .cat-other{background:var(--other)}
+  /* Form */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}
+  label{display:block;font-size:13px;color:var(--muted);margin:6px 0 4px}
+  input[type="time"], select, input[type="text"], textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit}
+  textarea{min-height:56px;resize:vertical}
+  .grid-small{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .right{margin-left:auto}
+  /* Totals */
+  .totals{margin-top:12px;display:grid;grid-template-columns:1fr;gap:8px}
+  @media(min-width:860px){.totals{grid-template-columns:2fr 1fr}}
+  table{border-collapse:collapse;width:100%;font-size:13px}
+  th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+  th{font-weight:600}
+  .muted{color:var(--muted)}
+  .small{font-size:12px}
+  .sticky-bottom{position:sticky;bottom:0;background:var(--card);padding:8px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>PlanDnia.xce — wersja mobilna</h1>
+    <p class="sub">Formularz dodawania/edycji bloków pod siatką. Działa w Safari na iPhonie. Dane zapisują się lokalnie.</p>
+    <div class="row">
+      <button class="btn" id="printBtn">Drukuj / PDF</button>
+      <button class="btn" id="exportBtn">Eksportuj JSON</button>
+      <input class="btn" type="file" id="importFile" accept="application/json" title="Importuj plan (JSON)">
+      <span class="small muted" id="lastSaved">—</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="legend">
+    <span class="tag"><span class="dot w"></span>Praca</span>
+    <span class="tag"><span class="dot r"></span>Odpoczynek</span>
+    <span class="tag"><span class="dot s"></span>Sport</span>
+    <span class="tag"><span class="dot t"></span>Duchowość</span>
+    <span class="tag"><span class="dot h"></span>Domowe</span>
+    <span class="tag"><span class="dot o"></span>Inne</span>
+  </div>
+
+  <!-- Grid -->
+  <section class="grid" id="grid" aria-label="Siatka tygodnia">
+    <div></div>
+    <div class="dayhead">Pon</div>
+    <div class="dayhead">Wt</div>
+    <div class="dayhead">Śr</div>
+    <div class="dayhead">Czw</div>
+    <div class="dayhead">Pt</div>
+    <div class="dayhead">Sob</div>
+    <div class="dayhead">Nd</div>
+
+    <!-- time gutter -->
+    <div id="timeGutter"></div>
+    <div class="col" data-day="0"></div>
+    <div class="col" data-day="1"></div>
+    <div class="col" data-day="2"></div>
+    <div class="col" data-day="3"></div>
+    <div class="col" data-day="4"></div>
+    <div class="col" data-day="5"></div>
+    <div class="col" data-day="6"></div>
+  </section>
+
+  <section class="totals">
+    <div class="card">
+      <h3>Podsumowanie czasu — <span class="small muted">na dzień</span></h3>
+      <div id="dayTotals"></div>
+    </div>
+    <div class="card">
+      <h3>Podsumowanie tygodnia</h3>
+      <table id="weekTotalsTbl"></table>
+    </div>
+  </section>
+
+  <!-- Inline Form -->
+  <section class="card" id="formCard">
+    <h3 id="formTitle">Dodaj / edytuj blok</h3>
+    <div class="grid-small">
+      <div>
+        <label>Dzień</label>
+        <select id="fDay">
+          <option value="0">Poniedziałek</option>
+          <option value="1">Wtorek</option>
+          <option value="2">Środa</option>
+          <option value="3">Czwartek</option>
+          <option value="4">Piątek</option>
+          <option value="5">Sobota</option>
+          <option value="6">Niedziela</option>
+        </select>
+      </div>
+      <div>
+        <label>Kategoria</label>
+        <select id="fCat">
+          <option value="work">Praca</option>
+          <option value="rest">Odpoczynek</option>
+          <option value="sport">Sport</option>
+          <option value="spirit">Duchowość</option>
+          <option value="home">Domowe</option>
+          <option value="other">Inne</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-small">
+      <div>
+        <label>Od</label>
+        <input type="time" id="fStart" value="09:00" required>
+      </div>
+      <div>
+        <label>Do</label>
+        <input type="time" id="fEnd" value="11:00" required>
+      </div>
+    </div>
+    <label>Opis (opcjonalnie)</label>
+    <input type="text" id="fTitle" placeholder="np. Pisanie artykułu / Siłownia">
+    <label>Szczegóły (opcjonalnie)</label>
+    <textarea id="fNote" placeholder="krótki komentarz"></textarea>
+    <input type="hidden" id="fId">
+    <div class="row" style="margin-top:10px">
+      <button class="btn primary" id="saveBtn">Zapisz</button>
+      <button class="btn" id="newBtn">Nowy</button>
+      <button class="btn danger right" id="deleteBtn" disabled>Usuń zaznaczony</button>
+    </div>
+    <p class="small muted">Wskazówka: stuknij blok w siatce, aby załadować go do formularza i edytować.</p>
+  </section>
+
+  <div class="sticky-bottom small muted">Tip iOS: po otwarciu w Safari użyj „Udostępnij → Dodaj do ekranu początkowego”, aby mieć aplikację na ekranie głównym.</div>
+</main>
+
+<script>
+const KEY = "PLANDNIA_XCE_MOBILE_V1";
+const START_H = 6, END_H = 23;
+const HOUR_PX = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hour'));
+
+// ===== Helpers =====
+const $ = sel => document.querySelector(sel);
+function pad(n){return (n<10?'0':'')+n}
+function toMin(t){ const [h,m] = t.split(':').map(Number); return h*60+m }
+function minToHM(m){ const h = Math.floor(m/60), mm = m%60; return `${h}h ${mm?mm+'m':''}`.trim() }
+function clampBlock(b){
+  const s = Math.max(toMin(`${START_H}:00`), Math.min(toMin(`${END_H}:00`)-15, toMin(b.start)));
+  const e = Math.max(s+15, Math.min(toMin(`${END_H}:00`), toMin(b.end)));
+  b.start = pad(Math.floor(s/60))+':'+pad(s%60);
+  b.end = pad(Math.floor(e/60))+':'+pad(e%60);
+  return b;
+}
+function uid(){ return Math.random().toString(36).slice(2,10) }
+function labelOf(cat){
+  return {work:'Praca',rest:'Odpoczynek',sport:'Sport',spirit:'Duchowość',home:'Domowe',other:'Inne'}[cat]||cat;
+}
+
+// Storage
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {blocks:[]} }catch(e){return {blocks:[]}} }
+function save(data){
+  localStorage.setItem(KEY, JSON.stringify(data));
+  $("#lastSaved").textContent = "Zapisano: " + new Date().toLocaleString();
+}
+
+// ===== Grid build =====
+function buildTimeGutter(){
+  const g = $("#timeGutter");
+  g.innerHTML = "";
+  for(let h=START_H; h<=END_H; h++){
+    const cell = document.createElement('div');
+    cell.className = 'timecell';
+    cell.textContent = pad(h)+":00";
+    g.appendChild(cell);
+  }
+}
+function drawHourLines(){
+  document.querySelectorAll('.col').forEach(col=>{
+    col.style.minHeight = ((END_H-START_H)*HOUR_PX)+'px';
+    col.innerHTML = ""; // clear blocks; then add hour lines
+    for(let h=0; h<=(END_H-START_H); h++){
+      const line = document.createElement('div');
+      line.className = 'hourline';
+      line.style.top = (h*HOUR_PX)+'px';
+      col.appendChild(line);
+    }
+  });
+}
+function posFromTime(t){ const mins = toMin(t) - START_H*60; return (mins/60)*HOUR_PX; }
+function heightFromTimes(s,e){ const durM = toMin(e)-toMin(s); return (durM/60)*HOUR_PX; }
+
+function renderBlocks(){
+  const state = load();
+  drawHourLines();
+  state.blocks.forEach(b => addBlockNode(b));
+  computeTotals();
+}
+
+function addBlockNode(b){
+  const col = document.querySelector(`.col[data-day="${b.day}"]`);
+  if(!col) return;
+  const div = document.createElement('div');
+  div.className = `block cat-${b.cat}`;
+  div.style.top = posFromTime(b.start)+'px';
+  div.style.height = Math.max(28, heightFromTimes(b.start,b.end))+'px';
+  div.dataset.id = b.id;
+  div.innerHTML = `<div class="tit">${b.title||'—'}</div>
+    <div class="meta">${b.start}–${b.end} • ${labelOf(b.cat)}</div>`;
+  div.title = b.note || '';
+  // load to form on tap
+  div.addEventListener('click', ()=> loadToForm(b.id, true));
+  col.appendChild(div);
+}
+
+// ===== Form logic =====
+const form = {
+  id: $("#fId"),
+  day: $("#fDay"),
+  cat: $("#fCat"),
+  start: $("#fStart"),
+  end: $("#fEnd"),
+  title: $("#fTitle"),
+  note: $("#fNote"),
+  titleH: $("#formTitle"),
+  save: $("#saveBtn"),
+  del: $("#deleteBtn"),
+  neu: $("#newBtn")
+};
+
+function clearForm(){
+  form.id.value = "";
+  form.day.value = "0";
+  form.cat.value = "work";
+  form.start.value = "09:00";
+  form.end.value = "11:00";
+  form.title.value = "";
+  form.note.value = "";
+  form.titleH.textContent = "Dodaj blok";
+  form.del.disabled = true;
+}
+
+function loadToForm(id, scrollIntoView=false){
+  const state = load();
+  const b = state.blocks.find(x=>x.id===id);
+  if(!b) return;
+  form.id.value = b.id;
+  form.day.value = String(b.day);
+  form.cat.value = b.cat;
+  form.start.value = b.start;
+  form.end.value = b.end;
+  form.title.value = b.title||"";
+  form.note.value = b.note||"";
+  form.titleH.textContent = "Edytuj blok";
+  form.del.disabled = false;
+  if(scrollIntoView) document.getElementById("formCard").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+form.save.addEventListener('click', (e)=>{
+  e.preventDefault();
+  const state = load();
+  let b = {
+    id: form.id.value || uid(),
+    day: +form.day.value,
+    cat: form.cat.value,
+    start: form.start.value,
+    end: form.end.value,
+    title: form.title.value.trim(),
+    note: form.note.value.trim()
+  };
+  b = clampBlock(b);
+  if(form.id.value){
+    const i = state.blocks.findIndex(x=>x.id===b.id);
+    if(i>=0) state.blocks[i] = b;
+  }else{
+    state.blocks.push(b);
+  }
+  save(state);
+  renderBlocks();
+  loadToForm(b.id); // keep in edit state
+});
+
+form.neu.addEventListener('click', (e)=>{ e.preventDefault(); clearForm(); });
+
+form.del.addEventListener('click', (e)=>{
+  e.preventDefault();
+  const id = form.id.value;
+  if(!id) return;
+  const state = load();
+  state.blocks = state.blocks.filter(x=>x.id!==id);
+  save(state);
+  clearForm();
+  renderBlocks();
+});
+
+// ===== Export / Import / Print =====
+$("#exportBtn").addEventListener('click', ()=>{
+  const data = load();
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `PlanDnia_xce_mobile_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+});
+
+$("#importFile").addEventListener('change', async (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  const text = await file.text();
+  try{
+    const data = JSON.parse(text);
+    if(!Array.isArray(data.blocks)) throw new Error("Niepoprawny format pliku.");
+    localStorage.setItem(KEY, JSON.stringify(data));
+    renderBlocks();
+    alert("Zaimportowano plan.");
+  }catch(err){
+    alert("Błąd importu: " + err.message);
+  }
+});
+
+$("#printBtn").addEventListener('click', ()=> window.print());
+
+// ===== Totals =====
+function computeTotals(){
+  const cats = ['work','rest','sport','spirit','home','other'];
+  const dayNames = ['Pon','Wt','Śr','Czw','Pt','Sob','Nd'];
+  const state = load();
+  const perDay = Array.from({length:7},()=>({}));
+  const perWeek = Object.fromEntries(cats.map(c=>[c,0]));
+
+  state.blocks.forEach(b=>{
+    const dur = toMin(b.end)-toMin(b.start);
+    perDay[b.day][b.cat] = (perDay[b.day][b.cat]||0) + dur;
+    perWeek[b.cat] += dur;
+  });
+
+  // day table
+  let html = '<table><thead><tr><th>Dzień</th><th>Praca</th><th>Odpoczynek</th><th>Sport</th><th>Duchowość</th><th>Domowe</th><th>Inne</th><th>Razem</th></tr></thead><tbody>';
+  perDay.forEach((row, d)=>{
+    const sum = cats.reduce((a,c)=>a+(row[c]||0),0);
+    html += `<tr><td>${dayNames[d]}</td>`+
+      cats.map(c=>`<td>${row[c]?minToHM(row[c]):'—'}</td>`).join('')+
+      `<td>${sum?minToHM(sum):'—'}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  $("#dayTotals").innerHTML = html;
+
+  // week table
+  const sumW = cats.reduce((a,c)=>a+perWeek[c],0);
+  let w = '<thead><tr><th>Kategoria</th><th>Czas</th></tr></thead><tbody>';
+  cats.forEach(c=>{
+    w += `<tr><td>${labelOf(c)}</td><td>${perWeek[c]?minToHM(perWeek[c]):'—'}</td></tr>`;
+  });
+  w += `<tr><th>Razem</th><th>${sumW?minToHM(sumW):'—'}</th></tr></tbody>`;
+  $("#weekTotalsTbl").innerHTML = w;
+}
+
+// ===== Init =====
+function init(){
+  buildTimeGutter();
+  renderBlocks();
+  save(load()); // stamp saved time
+  clearForm();
+}
+init();
+</script>
+</body>
+</html>
