@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#7c3aed"/>
+<title>Dzienniczek uczuć</title>
+<style>
+:root{
+  --bg:#f7f5fb; --card:#fff; --ink:#1f1a2b; --muted:#746d82; --line:#e8e2f0;
+  --accent:#7c3aed; --accent2:#ede9fe; --good:#166534; --warn:#9a3412;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.wrap{max-width:900px;margin:0 auto;padding:14px 16px}
+h1{font-size:22px;margin:2px 0}
+.sub{color:var(--muted);font-size:13px;margin:3px 0 10px}
+.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:2px}
+.tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;white-space:nowrap}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+main{padding-bottom:80px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;margin:12px 0;box-shadow:0 2px 12px rgba(50,30,80,.04)}
+h2{font-size:18px;margin:0 0 12px}
+h3{font-size:16px;margin:14px 0 8px}
+label{display:block;font-weight:600;margin:11px 0 6px}
+textarea,input,select{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px;font:inherit;background:#fff;color:var(--ink)}
+textarea{min-height:86px;resize:vertical}
+.row{display:flex;gap:9px;flex-wrap:wrap}
+.row>*{flex:1 1 180px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;padding:8px 11px;border-radius:999px}
+.chip.on{background:var(--accent2);border-color:#c4b5fd;color:#5b21b6;font-weight:700}
+.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px 14px;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:#b91c1c}
+.small{font-size:12px;color:var(--muted)}
+.hidden{display:none}
+.feedback{background:#faf8ff;border-left:4px solid var(--accent);padding:12px;border-radius:10px}
+.quote{font-style:italic;background:#fffdf6;border:1px solid #eee4bd;border-radius:12px;padding:12px;margin-top:10px}
+.entry{border-top:1px solid var(--line);padding:12px 0}
+.entry:first-child{border-top:0}
+.badge{display:inline-block;font-size:12px;background:var(--accent2);color:#5b21b6;border-radius:999px;padding:4px 8px;margin:2px 4px 2px 0}
+.stat{background:#fafafa;border:1px solid var(--line);border-radius:12px;padding:11px}
+.notice{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:11px;color:#7c2d12}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>💜 Dzienniczek uczuć</h1>
+    <p class="sub">Zapisz sytuację, uczucia, reakcję i to, czego potrzebujesz. Wpisy pozostają na tym urządzeniu.</p>
+    <div class="tabs">
+      <button class="tab active" data-tab="today">Nowy wpis</button>
+      <button class="tab" data-tab="history">Historia</button>
+      <button class="tab" data-tab="insights">Wnioski</button>
+      <button class="tab" data-tab="backup">Kopia danych</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+<section id="today">
+  <div class="card">
+    <h2>1. Co się wydarzyło?</h2>
+    <label>Data i godzina</label>
+    <input id="dateTime" type="datetime-local"/>
+    <label>Opisz sytuację krótko i konkretnie</label>
+    <textarea id="situation" placeholder="Co się wydarzyło? Kto był obecny? Co zostało powiedziane lub zrobione?"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>2. Co czuję?</h2>
+    <div id="feelings" class="chips"></div>
+    <div class="row">
+      <div>
+        <label>Siła uczucia: <span id="intensityVal">5</span>/10</label>
+        <input id="intensity" type="range" min="1" max="10" value="5"/>
+      </div>
+      <div>
+        <label>Inne uczucie</label>
+        <input id="otherFeeling" type="text" placeholder="np. rozczarowanie"/>
+      </div>
+    </div>
+    <label>Gdzie czuję to w ciele?</label>
+    <textarea id="body" placeholder="np. ścisk w gardle, napięcie w brzuchu, ciężar w klatce"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>3. Co działo się w mojej głowie?</h2>
+    <label>Jakie myśli pojawiły się automatycznie?</label>
+    <textarea id="thoughts" placeholder="np. „Nie liczę się”, „Znowu wszystko zepsuję”, „Muszę to natychmiast naprawić”"></textarea>
+    <label>Co zrobiłam albo chciałam zrobić?</label>
+    <textarea id="reaction" placeholder="Moja reakcja, impuls, zachowanie"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>4. Czego naprawdę potrzebuję?</h2>
+    <label>Potrzeba / granica / działanie</label>
+    <textarea id="need" placeholder="np. odpoczynku, rozmowy, postawienia granicy, przeproszenia, poproszenia o pomoc"></textarea>
+    <label>Co mogę zrobić dziś w sposób spokojny i uczciwy?</label>
+    <textarea id="nextStep" placeholder="Jedna mała konkretna rzecz"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>5. Pytania do przemyślenia</h2>
+    <label>Czy oddzielam fakty od swojej interpretacji?</label>
+    <textarea id="q1"></textarea>
+    <label>Czy próbuję kontrolować coś, na co nie mam wpływu?</label>
+    <textarea id="q2"></textarea>
+    <label>Czy moje działanie będzie zgodne z miłością, prawdą i szacunkiem do siebie?</label>
+    <textarea id="q3"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>6. Perspektywa duchowa</h2>
+    <label>Co chcę dziś oddać Bogu?</label>
+    <textarea id="spiritual" placeholder="Lęk, urazę, potrzebę kontroli, poczucie winy, konkretną osobę lub sytuację..."></textarea>
+    <div class="notice small">Część duchowa ma wspierać refleksję, a nie zastępować rozmowę z osobą duchowną, terapeutą lub lekarzem, gdy jest to potrzebne.</div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button id="saveBtn" class="btn primary">Zapisz wpis i pokaż feedback</button>
+      <button id="clearBtn" class="btn">Wyczyść formularz</button>
+    </div>
+    <p class="small" id="saveInfo"></p>
+  </div>
+
+  <div id="feedbackCard" class="card hidden">
+    <h2>Feedback do tego wpisu</h2>
+    <div id="feedbackText" class="feedback"></div>
+    <div id="scripture" class="quote"></div>
+  </div>
+</section>
+
+<section id="history" class="hidden">
+  <div class="card">
+    <h2>Historia wpisów</h2>
+    <div id="historyList"></div>
+  </div>
+</section>
+
+<section id="insights" class="hidden">
+  <div class="card">
+    <h2>Wnioski z dotychczasowych wpisów</h2>
+    <div id="insightsBody"></div>
+  </div>
+</section>
+
+<section id="backup" class="hidden">
+  <div class="card">
+    <h2>Kopia danych</h2>
+    <p>Możesz zapisać wszystkie wpisy do pliku JSON i później je odtworzyć.</p>
+    <div class="row">
+      <button id="exportBtn" class="btn primary">Eksportuj dane</button>
+      <label class="btn" style="text-align:center;cursor:pointer">Importuj dane
+        <input id="importFile" type="file" accept="application/json" style="display:none"/>
+      </label>
+    </div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+    <button id="deleteAllBtn" class="btn danger">Usuń wszystkie wpisy z tego urządzenia</button>
+  </div>
+</section>
+</main>
+
+<footer>Wersja lokalna — dane są przechowywane w localStorage tej przeglądarki.</footer>
+
+<script>
+const KEY="DZIENNICZEK_UCZUC_V1";
+const FEELINGS=["złość","smutek","lęk","wstyd","poczucie winy","samotność","bezradność","żal","frustracja","zazdrość","spokój","wdzięczność","radość","ulga"];
+const selected=new Set();
+
+const $=id=>document.getElementById(id);
+const fields=["situation","otherFeeling","body","thoughts","reaction","need","nextStep","q1","q2","q3","spiritual"];
+
+function init(){
+  const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+  $("dateTime").value=d.toISOString().slice(0,16);
+  FEELINGS.forEach(f=>{
+    const b=document.createElement("button");
+    b.type="button"; b.className="chip"; b.textContent=f;
+    b.onclick=()=>{selected.has(f)?selected.delete(f):selected.add(f); b.classList.toggle("on");};
+    $("feelings").appendChild(b);
+  });
+  $("intensity").oninput=()=> $("intensityVal").textContent=$("intensity").value;
+  document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab,b));
+  $("saveBtn").onclick=saveEntry;
+  $("clearBtn").onclick=clearForm;
+  $("exportBtn").onclick=exportData;
+  $("importFile").onchange=importData;
+  $("deleteAllBtn").onclick=deleteAll;
+}
+
+function getEntries(){try{return JSON.parse(localStorage.getItem(KEY)||"[]")}catch{return[]}}
+function setEntries(v){localStorage.setItem(KEY,JSON.stringify(v))}
+
+function saveEntry(){
+  const e={
+    id:Date.now(),
+    date:$("dateTime").value||new Date().toISOString(),
+    situation:$("situation").value.trim(),
+    feelings:[...selected],
+    otherFeeling:$("otherFeeling").value.trim(),
+    intensity:+$("intensity").value,
+    body:$("body").value.trim(),
+    thoughts:$("thoughts").value.trim(),
+    reaction:$("reaction").value.trim(),
+    need:$("need").value.trim(),
+    nextStep:$("nextStep").value.trim(),
+    q1:$("q1").value.trim(), q2:$("q2").value.trim(), q3:$("q3").value.trim(),
+    spiritual:$("spiritual").value.trim()
+  };
+  if(!e.situation && e.feelings.length===0 && !e.otherFeeling && !e.thoughts){
+    alert("Dodaj choć krótki opis sytuacji, uczucie albo myśl.");
+    return;
+  }
+  const arr=getEntries(); arr.unshift(e); setEntries(arr);
+  $("saveInfo").textContent="Wpis zapisany na tym urządzeniu.";
+  renderFeedback(e); renderHistory(); renderInsights();
+}
+
+function renderFeedback(e){
+  const fs=[...e.feelings]; if(e.otherFeeling) fs.push(e.otherFeeling);
+  const parts=[];
+  if(fs.length) parts.push(`Najmocniej wybrzmiewają tu: ${fs.join(", ")}. Samo nazwanie uczuć pomaga oddzielić je od działania.`);
+  if(e.intensity>=8) parts.push("Natężenie emocji jest bardzo wysokie. W takim momencie warto najpierw zadbać o uspokojenie ciała i odłożyć ważne decyzje, jeśli to możliwe.");
+  else if(e.intensity>=5) parts.push("Emocja jest wyraźna, ale jest jeszcze przestrzeń, żeby odpowiedzieć świadomie zamiast reagować impulsywnie.");
+  else parts.push("Natężenie nie jest bardzo wysokie, więc to dobry moment, by spokojnie przyjrzeć się temu, co ta sytuacja mówi o Twoich potrzebach.");
+  if(e.thoughts) parts.push("Sprawdź, które z zapisanych myśli są faktami, a które przewidywaniem, oceną albo próbą czytania cudzych intencji.");
+  if(e.need) parts.push("To, czego potrzebujesz, warto potraktować serio — ale potrzeba nie zawsze wskazuje jedyny sposób działania. Poszukaj rozwiązania, które jednocześnie chroni Ciebie i nie rani innych.");
+  if(e.nextStep) parts.push(`Dobrym kierunkiem jest mały, konkretny krok, który sama wskazałaś: „${escapeHtml(e.nextStep)}”.`);
+  else parts.push("Spróbuj nazwać jeden mały krok na dziś. Nie rozwiązanie całej sytuacji, tylko najbliższe dobre działanie.");
+  if(e.spiritual) parts.push("W części duchowej widać gotowość, by nie nieść wszystkiego samodzielnie. Możesz wrócić do tej intencji w krótkiej modlitwie.");
+  $("feedbackText").innerHTML=parts.map(p=>`<p>${p}</p>`).join("");
+
+  const theme=pickScripture(e);
+  $("scripture").innerHTML=`<strong>Myśl z Pisma Świętego</strong><br>„${theme.text}”<br><span class="small">${theme.ref}</span><p class="small" style="margin-bottom:0">${theme.note}</p>`;
+  $("feedbackCard").classList.remove("hidden");
+  $("feedbackCard").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function pickScripture(e){
+  const txt=(e.feelings.join(" ")+" "+e.otherFeeling+" "+e.thoughts+" "+e.spiritual).toLowerCase();
+  if(/lęk|strach|boję|bałam/.test(txt)) return {text:"Nie lękaj się, bo Ja jestem z tobą.",ref:"Iz 41,10",note:"Lęk można uznać i jednocześnie nie pozwolić, by sam decydował o działaniu."};
+  if(/złość|żal|uraz|gniew/.test(txt)) return {text:"Nie daj się zwyciężyć złu, ale zło dobrem zwyciężaj.",ref:"Rz 12,21",note:"Nie chodzi o zaprzeczanie krzywdzie, lecz o wybór odpowiedzi, która nie powiększa zła."};
+  if(/samot|bezrad|smut/.test(txt)) return {text:"Pan jest blisko skruszonych w sercu.",ref:"Ps 34,19",note:"Smutek i bezradność nie wykluczają obecności Boga ani możliwości poproszenia drugiego człowieka o pomoc."};
+  if(/wstyd|wina|poczucie winy/.test(txt)) return {text:"Jeśli wyznajemy nasze grzechy, Bóg jako wierny i sprawiedliwy odpuści je nam.",ref:"1 J 1,9",note:"Wina może prowadzić do naprawy, ale nie musi zamieniać się w potępienie siebie."};
+  return {text:"Wszystko ma swój czas.",ref:"Koh 3,1",note:"Nie każdą sytuację trzeba rozstrzygnąć od razu. Czasem właściwym krokiem jest spokojne rozeznanie."};
+}
+
+function renderHistory(){
+  const arr=getEntries(), box=$("historyList");
+  if(!arr.length){box.innerHTML='<p class="small">Nie ma jeszcze zapisanych wpisów.</p>';return}
+  box.innerHTML=arr.map(e=>{
+    const fs=[...(e.feelings||[])]; if(e.otherFeeling) fs.push(e.otherFeeling);
+    return `<div class="entry">
+      <div class="small">${formatDate(e.date)} • siła ${e.intensity||"-"}/10</div>
+      <strong>${escapeHtml(e.situation||"(bez opisu sytuacji)")}</strong>
+      <div>${fs.map(f=>`<span class="badge">${escapeHtml(f)}</span>`).join("")}</div>
+      ${e.nextStep?`<p><strong>Mój krok:</strong> ${escapeHtml(e.nextStep)}</p>`:""}
+      <button class="btn" onclick="viewEntry(${e.id})">Pokaż szczegóły</button>
+      <button class="btn danger" onclick="removeEntry(${e.id})">Usuń</button>
+      <div id="detail-${e.id}" class="hidden small" style="margin-top:10px"></div>
+    </div>`;
+  }).join("");
+}
+
+window.viewEntry=id=>{
+  const e=getEntries().find(x=>x.id===id), box=$("detail-"+id);
+  if(!e)return;
+  box.classList.toggle("hidden");
+  if(box.innerHTML)return;
+  box.innerHTML=`
+    <p><strong>Myśli:</strong> ${escapeHtml(e.thoughts||"—")}</p>
+    <p><strong>Reakcja:</strong> ${escapeHtml(e.reaction||"—")}</p>
+    <p><strong>Potrzeba:</strong> ${escapeHtml(e.need||"—")}</p>
+    <p><strong>Ciało:</strong> ${escapeHtml(e.body||"—")}</p>
+    <p><strong>Co oddaję Bogu:</strong> ${escapeHtml(e.spiritual||"—")}</p>`;
+}
+window.removeEntry=id=>{
+  if(!confirm("Usunąć ten wpis?"))return;
+  setEntries(getEntries().filter(x=>x.id!==id)); renderHistory(); renderInsights();
+}
+
+function renderInsights(){
+  const arr=getEntries(), box=$("insightsBody");
+  if(!arr.length){box.innerHTML='<p class="small">Wnioski pojawią się po zapisaniu pierwszych wpisów.</p>';return}
+  const counts={}, intens=arr.map(e=>+e.intensity||0).filter(Boolean);
+  arr.forEach(e=>{
+    [...(e.feelings||[]), e.otherFeeling].filter(Boolean).forEach(f=>counts[f]=(counts[f]||0)+1)
+  });
+  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const avg=intens.length?(intens.reduce((a,b)=>a+b,0)/intens.length).toFixed(1):"—";
+  const withNeed=arr.filter(e=>e.need).length;
+  const withStep=arr.filter(e=>e.nextStep).length;
+
+  box.innerHTML=`
+    <div class="row">
+      <div class="stat"><strong>${arr.length}</strong><br><span class="small">wpisów</span></div>
+      <div class="stat"><strong>${avg}/10</strong><br><span class="small">średnia siła emocji</span></div>
+      <div class="stat"><strong>${withStep}</strong><br><span class="small">wpisów z konkretnym krokiem</span></div>
+    </div>
+    <h3>Najczęściej pojawiające się uczucia</h3>
+    <p>${top.length?top.map(([f,n])=>`<span class="badge">${escapeHtml(f)} × ${n}</span>`).join(""):"Jeszcze brak danych."}</p>
+    <h3>Co można zauważyć</h3>
+    <p>${withNeed>=Math.ceil(arr.length/2)?"W większości wpisów potrafisz już nazwać potrzebę stojącą za emocją.":"W części wpisów potrzeba pozostaje nienazwana. W kolejnych sytuacjach warto szczególnie zatrzymać się na pytaniu: „Czego naprawdę teraz potrzebuję?”"}</p>
+    <p>${withStep>=Math.ceil(arr.length/2)?"Często przekładasz refleksję na konkretny następny krok.":"Warto częściej kończyć wpis jednym małym, wykonalnym działaniem na dziś."}</p>
+    <p class="small">To są proste wnioski na podstawie zapisanych pól, nie diagnoza psychologiczna.</p>`;
+}
+
+function clearForm(){
+  fields.forEach(id=>$(id).value="");
+  selected.clear(); document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));
+  $("intensity").value=5; $("intensityVal").textContent="5";
+  const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); $("dateTime").value=d.toISOString().slice(0,16);
+  $("feedbackCard").classList.add("hidden"); $("saveInfo").textContent="";
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify(getEntries(),null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="Dzienniczek_uczuc_"+new Date().toISOString().slice(0,10)+".json"; a.click();
+}
+function importData(ev){
+  const f=ev.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const x=JSON.parse(r.result); if(!Array.isArray(x))throw 0; setEntries(x); renderHistory(); renderInsights(); alert("Dane zaimportowane.");}catch{alert("Nieprawidłowy plik.")}};
+  r.readAsText(f);
+}
+function deleteAll(){
+  if(confirm("Na pewno usunąć WSZYSTKIE wpisy z tego urządzenia?")){localStorage.removeItem(KEY);renderHistory();renderInsights();}
+}
+function switchTab(id,btn){
+  ["today","history","insights","backup"].forEach(x=>$(x).classList.toggle("hidden",x!==id));
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active")); btn.classList.add("active");
+  if(id==="history")renderHistory(); if(id==="insights")renderInsights();
+}
+function formatDate(v){try{return new Date(v).toLocaleString("pl-PL")}catch{return v}}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+init(); renderHistory(); renderInsights();
+</script>
+</body>
+</html>
