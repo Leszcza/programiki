@@ -124,6 +124,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:20px}
     <div class="row">
       <button id="saveBtn" class="btn primary">Zapisz wpis i pokaż feedback</button>
       <button id="clearBtn" class="btn">Wyczyść formularz</button>
+      <button id="aiBtn" class="btn">🤖 Przygotuj do AI</button>
     </div>
     <p class="small" id="saveInfo"></p>
   </div>
@@ -188,6 +189,7 @@ function init(){
   document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab,b));
   $("saveBtn").onclick=saveEntry;
   $("clearBtn").onclick=clearForm;
+  $("aiBtn").onclick=prepareForAI;
   $("exportBtn").onclick=exportData;
   $("importFile").onchange=importData;
   $("deleteAllBtn").onclick=deleteAll;
@@ -220,7 +222,64 @@ function saveEntry(){
   $("saveInfo").textContent="Wpis zapisany na tym urządzeniu.";
   renderFeedback(e); renderHistory(); renderInsights();
 }
+async function prepareForAI(){
+  const feelings=[...selected];
+  const other=$("otherFeeling").value.trim();
+  if(other) feelings.push(other);
 
+  const text=`Chcę przeanalizować wpis z mojego Dzienniczka uczuć.
+
+SYTUACJA:
+${$("situation").value.trim() || "—"}
+
+UCZUCIA:
+${feelings.length ? feelings.join(", ") : "—"}
+Siła emocji: ${$("intensity").value}/10
+
+CIAŁO:
+${$("body").value.trim() || "—"}
+
+AUTOMATYCZNE MYŚLI:
+${$("thoughts").value.trim() || "—"}
+
+MOJA REAKCJA / IMPULS:
+${$("reaction").value.trim() || "—"}
+
+CZEGO POTRZEBUJĘ:
+${$("need").value.trim() || "—"}
+
+MÓJ NASTĘPNY KROK:
+${$("nextStep").value.trim() || "—"}
+
+ODPOWIEDZI DO REFLEKSJI:
+1. Fakty a interpretacja:
+${$("q1").value.trim() || "—"}
+
+2. Czy próbuję kontrolować coś, na co nie mam wpływu:
+${$("q2").value.trim() || "—"}
+
+3. Czy moje działanie jest zgodne z miłością, prawdą i szacunkiem do siebie:
+${$("q3").value.trim() || "—"}
+
+PERSPEKTYWA DUCHOWA:
+${$("spiritual").value.trim() || "—"}
+
+Proszę:
+- przeanalizuj tę konkretną sytuację,
+- pomóż mi oddzielić fakty od interpretacji,
+- wskaż możliwe schematy myślenia lub reagowania,
+- zadaj mi 2–3 pytania do dalszej refleksji,
+- zaproponuj jeden spokojny, konkretny następny krok,
+- dodaj krótki, trafnie dobrany fragment Pisma Świętego i wyjaśnij, jak może odnosić się do tej sytuacji.
+Nie diagnozuj mnie i nie oceniaj.`;
+
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("Gotowe 💜 Wpis został skopiowany. Otwórz ChatGPT i wklej go.");
+  }catch{
+    prompt("Skopiuj ten tekst i wklej do ChatGPT:",text);
+  }
+}
 function renderFeedback(e){
   const fs=[...e.feelings]; if(e.otherFeeling) fs.push(e.otherFeeling);
   const parts=[];
