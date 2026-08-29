@@ -320,6 +320,7 @@ function renderHistory(){
       <div>${fs.map(f=>`<span class="badge">${escapeHtml(f)}</span>`).join("")}</div>
       ${e.nextStep?`<p><strong>Mój krok:</strong> ${escapeHtml(e.nextStep)}</p>`:""}
       <button class="btn" onclick="viewEntry(${e.id})">Pokaż szczegóły</button>
+      <button class="btn" onclick="addAIFeedback(${e.id})">🤖 Wklej feedback AI</button>
       <button class="btn danger" onclick="removeEntry(${e.id})">Usuń</button>
       <div id="detail-${e.id}" class="hidden small" style="margin-top:10px"></div>
     </div>`;
@@ -336,8 +337,22 @@ window.viewEntry=id=>{
     <p><strong>Reakcja:</strong> ${escapeHtml(e.reaction||"—")}</p>
     <p><strong>Potrzeba:</strong> ${escapeHtml(e.need||"—")}</p>
     <p><strong>Ciało:</strong> ${escapeHtml(e.body||"—")}</p>
-    <p><strong>Co oddaję Bogu:</strong> ${escapeHtml(e.spiritual||"—")}</p>`;
+    <p><strong>Co oddaję Bogu:</strong> ${escapeHtml(e.spiritual||"—")}</p>
+${e.aiFeedback ? `<div class="feedback"><strong>🤖 Feedback AI:</strong><br>${escapeHtml(e.aiFeedback).replace(/\n/g,"<br>")}</div>` : ""}`;
 }
+  window.addAIFeedback=id=>{
+  const arr=getEntries();
+  const e=arr.find(x=>x.id===id);
+  if(!e)return;
+
+  const text=prompt("Wklej tutaj feedback z ChatGPT:",e.aiFeedback||"");
+  if(text===null)return;
+
+  e.aiFeedback=text.trim();
+  setEntries(arr);
+  renderHistory();
+  alert("Feedback AI zapisany przy tym wpisie. 💜");
+};
 window.removeEntry=id=>{
   if(!confirm("Usunąć ten wpis?"))return;
   setEntries(getEntries().filter(x=>x.id!==id)); renderHistory(); renderInsights();
